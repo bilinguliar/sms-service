@@ -181,7 +181,7 @@ Would be nice to add fe symbols from extended set. ~ yes, [GREAT], {curly are th
 
 				return mb.Message{
 					Originator:  originator,
-					Recipients:  mb.Recipients{Items: []mb.Recipient{mb.Recipient{Recipient: rcpntNum}}},
+					Recipients:  mb.Recipients{Items: []mb.Recipient{{Recipient: rcpntNum}}},
 					Body:        body,
 					TypeDetails: msgParams.TypeDetails,
 				}
@@ -243,5 +243,5 @@ func (mc *MockedMBClient) NewMessage(originator string, recipients []string, bod
 type MockedErrorproneMBClient struct{}
 
 func (mec *MockedErrorproneMBClient) NewMessage(originator string, recipients []string, body string, msgParams *mb.MessageParams) (*mb.Message, error) {
-	return &mb.Message{Errors: []mb.Error{mb.Error{Code: 42, Description: "Expected error", Parameter: ""}}}, errors.New("something went wrong")
+	return &mb.Message{Errors: []mb.Error{{Code: 42, Description: "Expected error", Parameter: ""}}}, errors.New("something went wrong")
 }
