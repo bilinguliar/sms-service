@@ -1,5 +1,7 @@
 # sms-service
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/bilinguliar/sms-service)](https://goreportcard.com/report/github.com/bilinguliar/sms-service)
+
 HTTP server that exposes endpoint for SMS sending. 
 
 * Accepts POST requests on URL: /messages
