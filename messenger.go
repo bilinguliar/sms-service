@@ -44,7 +44,7 @@ func NewMsgBirdClient(mbClient MBClient, queueSize int, sendRate time.Duration) 
 	return c
 }
 
-// process prepares data and sends generated SMS from sender to a recepient with provided text.
+// process prepares data and sends generated SMS from sender to a recipient with provided text.
 // Not exported as needs to be used through rate limiter.
 func (c *Client) process(mr Msg) {
 	msgParams := &mb.MessageParams{}

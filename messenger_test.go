@@ -15,7 +15,7 @@ func TestSplitToMessagesPanicsIfBodyIsToLong(t *testing.T) {
 	defer func() {
 		err := recover()
 		if err == nil {
-			t.Error("Expected panic never occured")
+			t.Error("Expected panic never occurred")
 		}
 	}()
 

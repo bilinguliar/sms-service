@@ -98,7 +98,7 @@ func (h *Handler) HandleMsg(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Would be great to return ID for status check. But we will need some kind of persistence to achive this.
+	// Would be great to return ID for status check. But we will need some kind of persistence to achieve this.
 	// Omitting this for now.
 	//
 	// We are keeping client connections open for some time if queue is full.
