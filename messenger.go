@@ -9,9 +9,15 @@ import (
 )
 
 const (
-	MaxSeqSMSCount    = 9
-	PlainSMSLen       = 160
+	// MaxSeqSMSCount max supported concatenated SMS
+	MaxSeqSMSCount = 9
+	// PlainSMSLen number of chars in 7-bit encoding for single SMS without concat.
+	PlainSMSLen = 160
+	// PlainConcatSMSLen number of chars in 7-bit encoding for single SMS with concat.
 	PlainConcatSMSLen = 153
+
+	udhField     = "udh"
+	escapedChars = "\n\\^~[]{}|~€"
 )
 
 // MBClient declares MessageBird NewMessage method.
@@ -19,15 +25,14 @@ type MBClient interface {
 	NewMessage(originator string, recipients []string, body string, msgParams *mb.MessageParams) (*mb.Message, error)
 }
 
-// Client holds actual MessageBird.com client and channel that we use it rate limiting.
+// Client holds actual MessageBird.com client and channel that we use for rate limiting.
 type Client struct {
 	mbClient MBClient
 	msgChan  chan Msg
 	sendRate time.Duration
 }
 
-// NewMsgBirdClient creates instance of messaging client that uses MessageBird.com API.
-// Rate limited.
+// NewMsgBirdClient creates new rate limited instance of messaging client that uses MessageBird.com API.
 func NewMsgBirdClient(mbClient MBClient, queueSize int, sendRate time.Duration) *Client {
 	c := &Client{
 		mbClient: mbClient,
@@ -46,7 +51,7 @@ func (c *Client) process(mr Msg) {
 
 	if mr.Header.IsSet() {
 		details := make(map[string]interface{})
-		details["udh"] = mr.Header.ToHexStr()
+		details[udhField] = mr.Header.ToHexStr()
 		msgParams.TypeDetails = details
 	}
 
@@ -59,6 +64,8 @@ func (c *Client) process(mr Msg) {
 	if err != nil {
 		// Possibly resubmit request to the queue with some delay,
 		// keeping track of number of attempts.
+		// This will require extending Msg to have attempts counter.
+		// For now simply logging errors.
 
 		if err != mb.ErrResponse {
 			log.Println("Failed to send SMS. Unrecoverable error:", err)
@@ -71,6 +78,7 @@ func (c *Client) process(mr Msg) {
 }
 
 // SendText submits SMS request. It will be send sometime in the future.
+// Call to this function may be long if channel is full. Consider passing context with timeout.
 func (c *Client) SendText(originator, recipient, body string) {
 	if getBodyCount(body) <= PlainSMSLen {
 		c.msgChan <- Msg{
@@ -111,7 +119,7 @@ func getBodyCount(body string) int {
 // getSymbolSize returns number of characters needed to represent given symbol in GSM_03.38
 // Symbols from extended set require preceding escape symbol.
 func getSymbolSize(r rune) int {
-	if strings.ContainsRune("\n\\^~[]{}|~€", r) {
+	if strings.ContainsRune(escapedChars, r) {
 		return 2
 	}
 	return 1

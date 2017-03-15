@@ -10,33 +10,38 @@ import (
 	"strconv"
 )
 
-const (
-	MaxMsgLen = PlainConcatSMSLen * 9
-)
+// MaxMsgLen maximum body that can be sent in 9 concatenated messages.
+const MaxMsgLen = PlainConcatSMSLen * 9
 
 var (
-	MSISDNRegex     = regexp.MustCompile(`^[1-9]{1}[0-9]{3,14}$`)
+	// MSISDNRegex validates string representation of MSISDN.
+	MSISDNRegex = regexp.MustCompile(`^[1-9]{1}[0-9]{3,14}$`)
+	// OriginatorRegex validates alphanumeric originator string.
 	OriginatorRegex = regexp.MustCompile(`^[a-zA-Z0-9]{1,11}$`)
 )
 
-type MsgRequest struct {
-	Originator string
-	Recipient  int
-	Message    string
-}
-
+// Handler is responsible for processing incommint HTTP message requests.
 type Handler struct {
 	messenger Messenger
 }
 
+// Messenger declares single method that we utilize to request SMS message submission.
 type Messenger interface {
 	SendText(originator, recipient, body string)
 }
 
+// NewHandler constructs Handler instance with provided Messenger implementation.
 func NewHandler(m Messenger) *Handler {
 	return &Handler{
 		messenger: m,
 	}
+}
+
+// MsgRequest HTTP request body that we accept on endpoint.
+type MsgRequest struct {
+	Originator string
+	Message    string
+	Recipient  int
 }
 
 // Validate checks if request values are in conflict with our specification.
@@ -68,6 +73,7 @@ func (r MsgRequest) Validate() error {
 	return err
 }
 
+// HandleMsg accepts POST requests with serialized message details.
 func (h *Handler) HandleMsg(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)

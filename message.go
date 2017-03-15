@@ -38,7 +38,7 @@ func (h UDH) IsSet() bool {
 	return h[3] != 0 && h[4] != 0
 }
 
-// Msg holds data required by Messenger Client to send SMS.
+// Msg is a data transfer structure that holds data required by Messenger Client to send SMS.
 //
 // Depending on datacode, type and presence of UDH header message body can have different number of symbols.
 // SMS is 1120 bit
@@ -47,6 +47,7 @@ func (h UDH) IsSet() bool {
 // Binary (8 bit) (140)
 // GSM_03.38 (7 bit) (160)
 //
+// For now supporting only GSM_03.38
 type Msg struct {
 	Header     UDH
 	Body       string

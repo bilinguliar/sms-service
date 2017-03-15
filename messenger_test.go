@@ -48,10 +48,10 @@ func TestSplitToMessagesCreatesMsgRequestsWithProperData(t *testing.T) {
 
 	for i, m := range msgs {
 		if m.Originator != originator {
-			t.Errorf("Actual originator: %q, expected: q", m.Originator, originator)
+			t.Errorf("Actual originator: %q, expected: %q", m.Originator, originator)
 		}
 		if m.Recipient != recipient {
-			t.Errorf("Actual recipient: %q, expected: q", m.Recipient, recipient)
+			t.Errorf("Actual recipient: %q, expected: %q", m.Recipient, recipient)
 		}
 		if m.Body != expectedBodies[i] {
 			t.Errorf("Actual body: %q, expected: %q", m.Body, expectedBodies[i])
