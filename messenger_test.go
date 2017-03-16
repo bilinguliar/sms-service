@@ -153,8 +153,8 @@ func TestSendText(t *testing.T) {
 			originator: "Karl",
 			recipient:  "380730220022",
 			body: `This text must be long enough to trigger msg concatenation logic. 
-Why I am writing this, why not simpli copy it from Wikipedia. Silence was the answer.
-Would be nice to add fe symbols from extended set. ~ yes, [GREAT], {curly are the best}.`,
+Why I am writing this, why not simply copy it from Wikipedia. Silence was the answer.
+Would be nice to add here symbols from extended set. ~ yes, [GREAT], {curly are the best}.`,
 			udhExpected: true,
 		},
 		{
