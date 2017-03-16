@@ -13,7 +13,7 @@ func TestNewUDH(t *testing.T) {
 	header := NewUDH(total, current)
 
 	actual := header.ToHexStr()
-	expected := "0500030503"
+	expected := "050003000503"
 
 	if actual != expected {
 		t.Errorf("Header is: %q, expected: %q", actual, expected)

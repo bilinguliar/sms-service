@@ -19,6 +19,7 @@ func NewUDH(total, current byte) UDH {
 		0x05,    // OveralLength
 		0x00,    // Type
 		0x03,    // HeaderLength
+		0x00,    // CSMS reference number
 		total,   // TotalMsg
 		current, // SequentialNum
 	}
@@ -26,7 +27,7 @@ func NewUDH(total, current byte) UDH {
 
 // UDH is a header that holds service information.
 // In our case it is used to create concatenated messages so has constant length.
-type UDH [5]byte
+type UDH [6]byte
 
 // ToHexStr returns string with header bytes in hex.
 func (h UDH) ToHexStr() string {
@@ -35,7 +36,7 @@ func (h UDH) ToHexStr() string {
 
 // IsSet returns true if default values were modified.
 func (h UDH) IsSet() bool {
-	return h[3] != 0 && h[4] != 0
+	return h[3] != 0 || h[4] != 0
 }
 
 // Msg is a data transfer structure that holds data required by Messenger Client to send SMS.
