@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestMsgRequestValidate(t *testing.T) {
 	cases := []struct {
@@ -17,18 +20,18 @@ func TestMsgRequestValidate(t *testing.T) {
 		},
 		{
 			req: MsgRequest{
-				Originator: "MessageBird2",  // 12 symbols
-				Recipient:  380660000000,    // valid MSISDN
-				Message:    "get shit done", // valid in all cases
+				Originator: "MessageBird2",            // 12 symbols, invalid
+				Recipient:  380660000000,              // valid MSISDN
+				Message:    "Hablo muy poco español.", // valid
 			},
 			valid: false,
 		},
 
 		{
 			req: MsgRequest{
-				Originator: "380660000001",  // valid MSISDN
-				Recipient:  380660000000,    // valid MSISDN
-				Message:    "get shit done", // valid
+				Originator: "380660000001", // valid MSISDN
+				Recipient:  380660000000,   // valid MSISDN
+				Message:    "Valid",
 			},
 			valid: true,
 		},
@@ -44,25 +47,17 @@ func TestMsgRequestValidate(t *testing.T) {
 			req: MsgRequest{
 				Originator: "Valid",
 				Recipient:  380660000000,
-				Message: "||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||| I AM TOO LONG ||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||" +
-					"|||||||||||||||||||||||||||||||||||||||||||||||",
+				Message:    strings.Repeat("m", PlainConcatSMSLen*MaxSeqSMSCount+1), // More than 9 SMS
 			},
 			valid: false,
+		},
+		{
+			req: MsgRequest{
+				Originator: "Valid",
+				Recipient:  380660000000,
+				Message:    strings.Repeat("m", PlainConcatSMSLen*MaxSeqSMSCount), // Valid 9 SMS
+			},
+			valid: true,
 		},
 
 		{

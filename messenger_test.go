@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -19,26 +20,13 @@ func TestSplitToMessagesPanicsIfBodyIsToLong(t *testing.T) {
 		}
 	}()
 
-	body := `
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||` // > 9 SMS
+	body := strings.Repeat("m", PlainConcatSMSLen*MaxSeqSMSCount+1) // More than 9 SMS
 
-	splitToMsgs("", "", body)
+	splitToMsgs("notUsed", "notUsed", body)
 }
 
 func TestSplitToMessagesCreatesMsgRequestsWithProperData(t *testing.T) {
-	body := `
-1||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-2||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-3|||||||||||||||||||||||||||||||||||END
-`
+	body := strings.Repeat("m", PlainConcatSMSLen*3)
 
 	expectedBodies := chunkBody(body, PlainConcatSMSLen)
 	originator := "Mr. Smith"
@@ -61,7 +49,6 @@ func TestSplitToMessagesCreatesMsgRequestsWithProperData(t *testing.T) {
 			t.Errorf("Actual header: %q, expected header: %q", m.Header.ToHexStr(), expectedHeader.ToHexStr())
 		}
 	}
-
 }
 
 // TestGetSymbCount checks if we take into account that some symbols must be escaped in SMS.
@@ -150,11 +137,9 @@ func TestSendText(t *testing.T) {
 		udhExpected bool
 	}{
 		{
-			originator: "Karl",
-			recipient:  "380730220022",
-			body: `This text must be long enough to trigger msg concatenation logic. 
-Why I am writing this, why not simply copy it from Wikipedia. Silence was the answer.
-Would be nice to add here symbols from extended set. ~ yes, [GREAT], {curly are the best}.`,
+			originator:  "Karl",
+			recipient:   "380730220022",
+			body:        strings.Repeat("m", PlainConcatSMSLen*3+1),
 			udhExpected: true,
 		},
 		{
@@ -243,5 +228,7 @@ func (mc *MockedMBClient) NewMessage(originator string, recipients []string, bod
 type MockedErrorproneMBClient struct{}
 
 func (mec *MockedErrorproneMBClient) NewMessage(originator string, recipients []string, body string, msgParams *mb.MessageParams) (*mb.Message, error) {
-	return &mb.Message{Errors: []mb.Error{{Code: 42, Description: "Expected error", Parameter: ""}}}, errors.New("something went wrong")
+	return &mb.Message{
+		Errors: []mb.Error{{Code: 42, Description: "Expected error", Parameter: ""}},
+	}, errors.New("something went wrong")
 }
