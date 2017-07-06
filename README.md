@@ -1,7 +1,7 @@
 # sms-service
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/bilinguliar/sms-service)](https://goreportcard.com/report/github.com/bilinguliar/sms-service)
-[![Build Status](https://travis-ci.org/bilinguliar/sms-service.svg?branch=master)](https://travis-ci.org/bilinguliar/sms-service)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cooldarkdryplace/sms-service)](https://goreportcard.com/report/github.com/cooldarkdryplace/sms-service)
+[![Build Status](https://travis-ci.org/cooldarkdryplace/sms-service.svg?branch=master)](https://travis-ci.org/cooldarkdryplace/sms-service)
 
 HTTP server that exposes endpoint for SMS sending. 
 
