@@ -87,7 +87,6 @@ func (h *Handler) HandleMsg(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer req.Body.Close()
 
 	if err := msg.Validate(); err != nil {
 		log.Println("Request values are not valid, error:", err)
