@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
+
+	smsd "github.com/cooldarkdryplace/sms-service"
 
 	mb "github.com/messagebird/go-rest-api"
 )
@@ -31,7 +36,7 @@ func main() {
 
 	flag.Parse()
 
-	client := NewMsgBirdClient(
+	client := smsd.NewMsgBirdClient(
 		mb.New(token),
 		queueLen,
 		sendRate,
@@ -39,7 +44,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	handler := NewHandler(client)
+	handler := smsd.NewHandler(client)
 	mux.HandleFunc(smsEndpoint, handler.HandleMsg)
 
 	// Enabling timeouts as requests will be blocked if SMS queue is full.
@@ -52,6 +57,27 @@ func main() {
 		Handler:      mux,
 	}
 
-	// TODO handle graceful shutdown.
-	log.Fatal(srv.ListenAndServe())
+	errChan := make(chan error)
+	signalChan := make(chan os.Signal, 1)
+
+	signal.Notify(signalChan, os.Interrupt)
+
+	go func() {
+		errChan <- srv.ListenAndServe()
+	}()
+
+	log.Printf("SMSd started %s\n", time.Now().UTC())
+
+	select {
+	case err := <-errChan:
+		log.Fatal(err)
+	case <-signalChan:
+		log.Println("Interrupt recieved. Graceful shutdown.")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Fatalf("Server shutdown failed with error: %s\n", err)
+		}
+	}
 }

@@ -1,4 +1,4 @@
-package main
+package smsd
 
 import (
 	"log"
@@ -29,7 +29,6 @@ type MBClient interface {
 type Client struct {
 	mbClient MBClient
 	msgChan  chan Msg
-	sendRate time.Duration
 }
 
 // NewMsgBirdClient creates new rate limited instance of messaging client that uses MessageBird.com API.
